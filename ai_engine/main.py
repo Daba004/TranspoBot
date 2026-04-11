@@ -126,6 +126,90 @@ async def ask_assistant(request: ChatRequest):
 def read_root():
     return {"status": "TranspoBot AI Engine is running"}
 
+@app.get("/api/stats")
+def get_stats():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    stats = {}
+    queries = {
+        "total_trajets":     "SELECT COUNT(*) as n FROM trajets WHERE statut='termine'",
+        "trajets_en_cours":  "SELECT COUNT(*) as n FROM trajets WHERE statut='en_cours'",
+        "vehicules_actifs":  "SELECT COUNT(*) as n FROM vehicules WHERE statut='actif'",
+        "incidents_ouverts": "SELECT COUNT(*) as n FROM incidents WHERE resolu=FALSE",
+        "recette_totale":    "SELECT COALESCE(SUM(recette),0) as n FROM trajets WHERE statut='termine'",
+    }
+    for key, sql in queries.items():
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        stats[key] = result["n"] if result else 0
+    cursor.close()
+    conn.close()
+    return stats
+
+@app.get("/api/vehicules")
+def get_vehicules():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM vehicules ORDER BY immatriculation")
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+@app.get("/api/chauffeurs")
+def get_chauffeurs():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT c.*, v.immatriculation
+        FROM chauffeurs c
+        LEFT JOIN vehicules v ON c.vehicule_id = v.id
+        ORDER BY c.nom
+    """)
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+@app.get("/api/trajets/recent")
+def get_trajets_recent():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT t.*, l.nom as ligne, ch.nom as chauffeur_nom,
+               v.immatriculation
+        FROM trajets t
+        JOIN lignes l ON t.ligne_id = l.id
+        JOIN chauffeurs ch ON t.chauffeur_id = ch.id
+        JOIN vehicules v ON t.vehicule_id = v.id
+        ORDER BY t.date_heure_depart DESC
+        LIMIT 20
+    """)
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+@app.get("/api/incidents")
+def get_incidents():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT i.*, t.date_heure_depart
+        FROM incidents i
+        JOIN trajets t ON i.trajet_id = t.id
+        ORDER BY i.date_incident DESC
+    """)
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "app": "TranspoBot"}
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
