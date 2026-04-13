@@ -20,8 +20,8 @@ if($search) {
 include 'includes/modals.php';
 ?>
 
-<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30">
-    <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 backdrop-blur-sm">
+<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30 flex-1 flex flex-col min-h-0">
+    <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 backdrop-blur-sm shrink-0">
         <div>
             <h2 class="text-xl font-display font-black text-slate-900 tracking-tight">Registre du Personnel</h2>
             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestion administrative et operationnelle</p>
@@ -39,13 +39,13 @@ include 'includes/modals.php';
             </button>
         </div>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-auto flex-1 custom-scrollbar min-h-0 border-t border-slate-100">
         <table class="w-full text-left border-separate border-spacing-0">
             <thead class="bg-slate-50 text-slate-400 text-[8px] uppercase font-black tracking-widest">
                 <tr>
-                    <th class="px-6 py-4 border-b border-slate-100">Conducteur Affete</th>
+                    <th class="px-6 py-4 border-b border-slate-100">Conducteur Affecte</th>
                     <th class="px-6 py-4 border-b border-slate-100">Contact & Liaison</th>
-                    <th class="px-6 py-4 border-b border-slate-100">Permis & Capacite</th>
+                    <th class="px-6 py-4 border-b border-slate-100">Permis & Categorie</th>
                     <th class="px-6 py-4 border-b border-slate-100 text-right">Rapport d'État</th>
                     <th class="px-6 py-4 border-b border-slate-100 text-right">Audit</th>
                 </tr>

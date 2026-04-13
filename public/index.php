@@ -32,7 +32,7 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
                                ORDER BY t.date_heure_depart DESC LIMIT 6")->fetchAll();
 ?>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-6 shrink-0">
     <!-- Stat Card 1 -->
     <div class="bg-white p-5 rounded-[1.5rem] border border-slate-200/60 shadow-lg shadow-slate-200/30 transition-all duration-300 hover:-translate-y-1">
         <div class="flex items-center justify-between mb-4">
@@ -44,7 +44,7 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
             <span class="text-[10px] font-black text-emerald-500 bg-emerald-50 px-2 py-1 rounded-full uppercase tracking-widest">+12%</span>
         </div>
         <p class="text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Vehicules de ligne</p>
-        <h3 class="text-3xl font-display font-black text-slate-900"><?php echo $stats['vehicules']; ?></h3>
+        <h3 id="stat-vehicules" class="text-3xl font-display font-black text-slate-900"><?php echo $stats['vehicules']; ?></h3>
     </div>
 
     <!-- Stat Card 2 -->
@@ -58,7 +58,7 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
             <span class="text-[10px] font-black text-amber-500 bg-amber-50 px-2 py-1 rounded-full uppercase tracking-widest">Optimal</span>
         </div>
         <p class="text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Chauffeurs Libres</p>
-        <h3 class="text-3xl font-display font-black text-slate-900"><?php echo $stats['chauffeurs']; ?></h3>
+        <h3 id="stat-chauffeurs" class="text-3xl font-display font-black text-slate-900"><?php echo $stats['chauffeurs']; ?></h3>
     </div>
 
     <!-- Stat Card 3 -->
@@ -72,7 +72,7 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
             <span class="text-[10px] font-black text-slate-300 bg-slate-50 px-2 py-1 rounded-full uppercase tracking-widest">Total</span>
         </div>
         <p class="text-[11px] font-bold text-slate-400 uppercase tracking-tight mb-0.5">Trajets Termines</p>
-        <h3 class="text-3xl font-display font-black text-slate-900"><?php echo $stats['trajets']; ?></h3>
+        <h3 id="stat-trajets" class="text-3xl font-display font-black text-slate-900"><?php echo $stats['trajets']; ?></h3>
     </div>
 
     <!-- Stat Card 4 (Forest Green Highlight) -->
@@ -87,17 +87,17 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
             </div>
-            <a href="incidents.php" class="text-[10px] font-black text-emerald-900 bg-amber-400 px-3 py-1.5 rounded-full uppercase tracking-widest hover:scale-105 transition-all">Incidents: <?php echo $stats['incidents_non_resolus']; ?></a>
+            <a href="incidents.php" class="text-[10px] font-black text-emerald-900 bg-amber-400 px-3 py-1.5 rounded-full uppercase tracking-widest hover:scale-105 transition-all">Incidents: <span id="stat-incidents"><?php echo $stats['incidents_non_resolus']; ?></span></a>
         </div>
         <p class="text-[11px] font-bold text-emerald-100/60 uppercase tracking-tight mb-0.5 relative z-10">Recette Globale</p>
-        <h3 class="text-3xl font-display font-black text-white relative z-10 tracking-tight"><?php echo number_format($stats['recette'], 0, ',', ' '); ?> <span class="text-sm text-emerald-300">F</span></h3>
+        <h3 class="text-3xl font-display font-black text-white relative z-10 tracking-tight"><span id="stat-recette"><?php echo number_format($stats['recette'], 0, ',', ' '); ?></span> <span class="text-sm text-emerald-300">F</span></h3>
     </div>
 </div>
 
-<div class="flex flex-col lg:flex-row gap-6 mb-8 items-stretch">
+<div class="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
     <!-- Recent Events - Left Column -->
-    <div class="flex-1 min-w-0 flex flex-col">
-        <div class="bg-white rounded-[1.5rem] border border-slate-200/60 overflow-hidden shadow-xl shadow-slate-200/30 flex-1">
+    <div class="flex-1 min-w-0 flex flex-col min-h-0">
+        <div class="bg-white rounded-[1.5rem] border border-slate-200/60 overflow-hidden shadow-xl shadow-slate-200/30 flex-1 flex flex-col min-h-0">
             <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm">
                 <div>
                     <h2 class="text-lg font-display font-black text-slate-900 tracking-tight">Flux de Transport Recents</h2>
@@ -105,7 +105,7 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
                 </div>
                 <a href="historique.php" class="bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-[9px] uppercase font-black hover:bg-emerald-700 hover:text-white transition-all tracking-widest border border-emerald-100 shadow-sm">Exporter Historique</a>
             </div>
-            <div class="overflow-x-auto">
+            <div class="overflow-auto flex-1 custom-scrollbar min-h-0">
                 <table class="w-full text-left border-separate border-spacing-0">
                     <thead class="bg-slate-50 text-slate-400 text-[8px] uppercase font-black tracking-widest">
                         <tr>
@@ -153,62 +153,14 @@ $recent_trajets = $pdo->query("SELECT t.*, l.nom as ligne_nom, l.code as ligne_c
         </div>
     </div>
 
-    <!-- AI Assistant Widget - Integrated Right Side -->
-    <div class="w-full lg:w-[320px] shrink-0 flex flex-col min-h-[450px]">
-        <div class="bg-[#064e3b] rounded-[1.5rem] shadow-2xl shadow-emerald-900/40 flex flex-col h-full overflow-hidden border border-emerald-800">
-            <div class="p-6 border-b border-emerald-800 flex items-center gap-3 bg-emerald-950/20 backdrop-blur-md">
-                <div class="w-10 h-10 bg-amber-400 text-emerald-950 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-400/20">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-display font-black text-white text-base tracking-tight">Assistant TranspoBot</h2>
-                    <p class="text-[9px] text-emerald-400 font-black uppercase tracking-widest flex items-center gap-1 mt-0.5">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span> IA Connectée
-                    </p>
-                </div>
-            </div>
-
-            <!-- Chat Container -->
-            <div id="chat-container" class="flex-1 overflow-y-auto p-6 space-y-6 scroll-smooth custom-scrollbar">
-                <div class="flex gap-3 max-w-[90%]">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-800 flex-shrink-0 flex items-center justify-center text-emerald-400 border border-emerald-700">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
-                    </div>
-                    <div class="bg-emerald-800/50 backdrop-blur-sm p-4 rounded-3xl rounded-tl-none text-sm text-emerald-100 border border-emerald-700 shadow-sm leading-relaxed">
-                        Bonjour ! Je suis votre assistant TranspoBot pilote par IA. Comment puis-je vous aider aujourd'hui ? 
-                        <div class="mt-3 p-2 bg-emerald-950/30 rounded-xl border border-emerald-900/50 text-[10px] text-emerald-400 font-bold uppercase tracking-widest">
-                            Questions suggerees:
-                            <ul class="mt-1 space-y-1 normal-case tracking-normal text-emerald-200">
-                                <li>• "Recette totale d'aujourd'hui"</li>
-                                <li>• "Liste des incidents critiques"</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Input Area -->
-            <div class="p-6 bg-emerald-950/20 backdrop-blur-md border-t border-emerald-800">
-                <form id="chat-form" class="relative">
-                    <input type="text" id="chat-input" 
-                        class="w-full bg-emerald-900/50 border border-emerald-700 rounded-2xl py-4 pl-5 pr-14 text-sm text-white placeholder-emerald-500 outline-none focus:ring-2 focus:ring-amber-400/50 transition-all shadow-inner shadow-black/20"
-                        placeholder="Tapez votre requete IA...">
-                    <button type="submit" class="absolute right-2 top-2 w-10 h-10 bg-amber-400 text-emerald-900 rounded-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-400/20">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
+    <!-- Old AI widget removed -->
 </div>
 
 <?php 
 include 'includes/details_modal.php';
+include 'includes/chatbot.php';
+?>
+<script src="assets/js/realtime.js"></script>
+<?php
 include 'includes/footer.php'; 
 ?>

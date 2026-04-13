@@ -15,6 +15,10 @@ CREATE TABLE vehicules (
     statut ENUM('actif','maintenance','hors_service') DEFAULT 'actif',
     kilometrage INT DEFAULT 0,
     date_acquisition DATE,
+    latitude DECIMAL(10,7) DEFAULT NULL,
+    longitude DECIMAL(10,7) DEFAULT NULL,
+    carburant INT DEFAULT 100,
+    vitesse DECIMAL(5,2) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -41,8 +45,13 @@ CREATE TABLE lignes (
     origine VARCHAR(100) NOT NULL,
     destination VARCHAR(100) NOT NULL,
     distance_km DECIMAL(6,2),
-    duree_minutes INT
+    duree_minutes INT,
+    origine_lat DECIMAL(10,7) DEFAULT NULL,
+    origine_lng DECIMAL(10,7) DEFAULT NULL,
+    destination_lat DECIMAL(10,7) DEFAULT NULL,
+    destination_lng DECIMAL(10,7) DEFAULT NULL
 );
+
 
 -- Tarifs
 CREATE TABLE tarifs (
@@ -100,11 +109,11 @@ INSERT INTO chauffeurs (nom, prenom, telephone, numero_permis, categorie_permis,
 ('SECK', 'Ousmane', '+221774567890', 'P-2022-004', 'D', 5, '2022-10-20'),
 ('BA', 'Aminata', '+221775678901', 'P-2023-005', 'D', NULL, '2023-01-10');
 
-INSERT INTO lignes (code, nom, origine, destination, distance_km, duree_minutes) VALUES
-('L1', 'Ligne Dakar-Thies', 'Dakar', 'Thies', 70.5, 90),
-('L2', 'Ligne Dakar-Mbour', 'Dakar', 'Mbour', 82.0, 120),
-('L3', 'Ligne Centre-Banlieue', 'Plateau', 'Pikine', 15.0, 45),
-('L4', 'Ligne Aéroport', 'Centre-ville', 'AIBD', 45.0, 60);
+INSERT INTO lignes (code, nom, origine, destination, distance_km, duree_minutes, origine_lat, origine_lng, destination_lat, destination_lng) VALUES
+('L1', 'Ligne Dakar-Thiès', 'Dakar', 'Thiès', 70.5, 90, 14.6937, -17.4441, 14.7886, -16.9260),
+('L2', 'Ligne Dakar-Mbour', 'Dakar', 'Mbour', 82.0, 120, 14.6937, -17.4441, 14.4177, -16.9599),
+('L3', 'Ligne Centre-Banlieue', 'Plateau', 'Pikine', 15.0, 45, 14.6693, -17.4380, 14.7645, -17.3864),
+('L4', 'Ligne Aéroport', 'Centre-ville', 'AIBD', 45.0, 60, 14.6693, -17.4380, 14.7397, -17.4902);
 
 INSERT INTO tarifs (ligne_id, type_client, prix) VALUES
 (1, 'normal', 2500), (1, 'etudiant', 1500), (1, 'senior', 1800),

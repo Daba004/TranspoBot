@@ -17,8 +17,8 @@ if($search) {
 include 'includes/modals.php';
 ?>
 
-<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30">
-    <div class="p-6 border-b border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 backdrop-blur-sm">
+<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30 flex-1 flex flex-col min-h-0">
+    <div class="p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white/50 backdrop-blur-sm shrink-0">
         <div>
             <h2 class="text-xl font-display font-black text-slate-900 tracking-tight">Registre de la Flotte</h2>
             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Gestion technique et operationnelle</p>
@@ -36,7 +36,7 @@ include 'includes/modals.php';
             </button>
         </div>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-auto flex-1 custom-scrollbar min-h-0 border-t border-slate-100">
         <table class="w-full text-left border-separate border-spacing-0">
             <thead class="bg-slate-50 text-slate-400 text-[8px] uppercase font-black tracking-widest">
                 <tr>
@@ -44,13 +44,14 @@ include 'includes/modals.php';
                     <th class="px-6 py-4 border-b border-slate-100">Categorie</th>
                     <th class="px-6 py-4 border-b border-slate-100">Capacite</th>
                     <th class="px-6 py-4 border-b border-slate-100">Etat Rapporte</th>
+                    <th class="px-6 py-4 border-b border-slate-100">Performance (Carb/Vit)</th>
                     <th class="px-6 py-4 border-b border-slate-100">Utilisation</th>
                     <th class="px-6 py-4 border-b border-slate-100 text-right">Audit</th>
                 </tr>
             </thead>
             <tbody class="text-sm divide-y divide-slate-100">
                 <?php foreach($vehicules as $v): ?>
-                <tr class="group hover:bg-emerald-50/40 transition-all duration-300">
+                <tr id="vehicle-row-<?php echo $v['id']; ?>" class="group hover:bg-emerald-50/40 transition-all duration-300">
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex flex-col">
                             <span class="font-display font-black text-slate-900 text-base tracking-tight leading-tight group-hover:text-emerald-900 transition-colors"><?php echo $v['immatriculation']; ?></span>
@@ -70,14 +71,28 @@ include 'includes/modals.php';
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="text-slate-900 font-black bg-stone/50 px-2.5 py-1 rounded-lg border border-slate-100 text-[10px]"><?php echo $v['capacite']; ?> Pax</span>
+                        <span class="text-slate-900 font-black bg-stone/50 px-2.5 py-1 rounded-lg border border-slate-100 text-[10px]"><?php echo $v['capacite']; ?> Pas</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm <?php 
+                        <span class="status-cell px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest shadow-sm <?php 
                             echo $v['statut'] == 'actif' ? 'bg-emerald-100 text-emerald-700' : ($v['statut'] == 'maintenance' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'); 
                         ?>">
                             <?php echo $v['statut']; ?>
                         </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex flex-col gap-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Carburant</span>
+                                <span class="text-[10px] font-black text-slate-800"><?php echo $v['carburant'] ?? 100; ?>%</span>
+                            </div>
+                            <div class="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="fuel-bar-fill h-full bg-emerald-500 rounded-full transition-all duration-1000" style="width: <?php echo $v['carburant'] ?? 100; ?>%"></div>
+                            </div>
+                            <div class="flex items-center gap-1 mt-1">
+                                <span class="speed-cell text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md"><?php echo round($v['vitesse'] ?? 0); ?> km/h</span>
+                            </div>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex flex-col">
@@ -105,5 +120,5 @@ include 'includes/modals.php';
         </table>
     </div>
 </div>
-
+<script src="assets/js/realtime.js"></script>
 <?php include 'includes/footer.php'; ?>

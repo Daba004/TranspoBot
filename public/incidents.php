@@ -19,7 +19,7 @@ $incidents = $pdo->query("SELECT i.*, t.date_heure_depart, l.nom as ligne_nom, v
                           ORDER BY i.date_incident DESC")->fetchAll();
 ?>
 
-<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6 shrink-0">
     <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-lg shadow-slate-200/30 group hover:translate-y-1 transition-all">
         <div class="flex items-center gap-4 mb-3">
             <div class="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-slate-500 group-hover:bg-[#064e3b] group-hover:text-white transition-colors">
@@ -27,7 +27,7 @@ $incidents = $pdo->query("SELECT i.*, t.date_heure_depart, l.nom as ligne_nom, v
             </div>
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cumul des Incidents</p>
         </div>
-        <h3 class="text-3xl font-display font-black text-slate-800"><?php echo $incident_stats['total']; ?></h3>
+        <h3 id="stat-inc-total" class="text-3xl font-display font-black text-slate-800"><?php echo $incident_stats['total']; ?></h3>
     </div>
     <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-lg shadow-slate-200/30 group hover:translate-y-1 transition-all">
         <div class="flex items-center gap-3 mb-2">
@@ -36,7 +36,7 @@ $incidents = $pdo->query("SELECT i.*, t.date_heure_depart, l.nom as ligne_nom, v
             </div>
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">En cours</p>
         </div>
-        <h3 class="text-3xl font-display font-black text-amber-600"><?php echo $incident_stats['non_resolus']; ?></h3>
+        <h3 id="stat-inc-current" class="text-3xl font-display font-black text-amber-600"><?php echo $incident_stats['non_resolus']; ?></h3>
     </div>
     <div class="bg-white p-5 rounded-2xl border border-slate-200/60 shadow-lg shadow-slate-200/30 group hover:translate-y-1 transition-all">
         <div class="flex items-center gap-3 mb-2">
@@ -45,18 +45,18 @@ $incidents = $pdo->query("SELECT i.*, t.date_heure_depart, l.nom as ligne_nom, v
             </div>
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Urgence</p>
         </div>
-        <h3 class="text-3xl font-display font-black text-rose-600"><?php echo $incident_stats['graves']; ?></h3>
+        <h3 id="stat-inc-grave" class="text-3xl font-display font-black text-rose-600"><?php echo $incident_stats['graves']; ?></h3>
     </div>
 </div>
 
-<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30">
-    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm">
+<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30 flex-1 flex flex-col min-h-0">
+    <div class="p-6 flex justify-between items-center bg-white/50 backdrop-blur-sm shrink-0">
         <div>
             <h2 class="text-xl font-display font-black text-slate-900 tracking-tight">Journal des Incidents</h2>
             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Audit technique des operations</p>
         </div>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-auto flex-1 custom-scrollbar min-h-0 border-t border-slate-100">
         <table class="w-full text-left">
             <thead class="bg-slate-50 text-slate-400 text-[8px] uppercase font-black tracking-widest">
                 <tr>
@@ -125,4 +125,5 @@ $incidents = $pdo->query("SELECT i.*, t.date_heure_depart, l.nom as ligne_nom, v
     </div>
 </div>
 
+<script src="assets/js/realtime.js"></script>
 <?php include 'includes/footer.php'; ?>

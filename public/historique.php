@@ -50,8 +50,8 @@ foreach($all_tarifs as $tr) {
 }
 ?>
 
-<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30">
-    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm">
+<div class="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-lg shadow-slate-200/30 flex-1 flex flex-col min-h-0">
+    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-sm shrink-0">
         <div>
             <h2 class="text-xl font-display font-black text-slate-900 tracking-tight">Journal des Activités</h2>
             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Audit complet des opérations</p>
@@ -74,7 +74,7 @@ foreach($all_tarifs as $tr) {
     </div>
 
     <!-- Filter Bar -->
-    <div id="filter-bar" class="<?php echo ($ligne_id || $statut || $date_depart) ? '' : 'hidden'; ?> p-6 bg-stone/50 border-b border-slate-100">
+    <div id="filter-bar" class="<?php echo ($ligne_id || $statut || $date_depart) ? '' : 'hidden'; ?> p-6 bg-stone/50 border-b border-slate-100 shrink-0">
         <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div>
                 <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Affiner par Ligne</label>
@@ -107,14 +107,14 @@ foreach($all_tarifs as $tr) {
             </div>
         </form>
     </div>
-    <div class="overflow-x-auto">
+    <div class="overflow-auto flex-1 custom-scrollbar min-h-0 border-t border-slate-100">
         <table class="w-full text-left">
             <thead class="bg-slate-50 text-slate-400 text-[8px] uppercase font-black tracking-widest">
                 <tr>
                     <th class="px-6 py-4 border-b border-slate-100">Date / Heure</th>
                     <th class="px-6 py-4 border-b border-slate-100">Ligne</th>
                     <th class="px-6 py-4 border-b border-slate-100">Chauffeur / Véhicule</th>
-                    <th class="px-6 py-4 border-b border-slate-100 text-center">Pax</th>
+                    <th class="px-6 py-4 border-b border-slate-100 text-center">Pas</th>
                     <th class="px-6 py-4 border-b border-slate-100">Recette</th>
                     <th class="px-6 py-4 border-b border-slate-100">Status</th>
                     <th class="px-6 py-4 border-b border-slate-100 text-right">Audit</th>
