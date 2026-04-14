@@ -186,6 +186,8 @@ mb_internal_encoding('UTF-8');
             </div>
         </aside>
 
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col min-w-0 overflow-hidden bg-[#f4f7f6]">
             <!-- Header -->
             <header class="h-20 bg-white/70 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 md:px-8 flex-shrink-0 sticky top-0 z-40">
                 <div class="flex items-center gap-2 md:gap-4">
