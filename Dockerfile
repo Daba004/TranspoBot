@@ -1,29 +1,44 @@
+# Use PHP 8.2 with Apache as the base image
 FROM php:8.2-apache
 
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load \
-         /etc/apache2/mods-enabled/mpm_*.conf \
-    && ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load \
-    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN a2enmod rewrite headers
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mysqli
 
-RUN sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
+# Enable Apache modules for proxying and rewrites
+RUN a2enmod proxy proxy_http rewrite headers
 
-COPY . /var/www/html/
+# Ensure only mpm_prefork is loaded (Nuclear fix for 'More than one MPM loaded')
+# We do this both in the build and in the entrypoint for maximum safety
+RUN rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
+    && rm -f /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf \
+    && a2enmod mpm_prefork || true
 
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# Set the working directory
+WORKDIR /var/www/html
 
+# Copy the entire project for structured access
+COPY . .
+
+# Install Python dependencies for the AI engine
+RUN pip3 install --no-cache-dir -r ai_engine/requirements.txt --break-system-packages
+
+# Copy Apache configuration to sites-available
+COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
+
+# Prepare the entrypoint script
+RUN sed -i 's/\r$//' entrypoint.sh && chmod +x entrypoint.sh
+
+# Expose the port (typically 80 or 8080 on Railway)
 EXPOSE 80
 
-CMD ["sh", "-c", " \
-    rm -f /etc/apache2/mods-enabled/mpm_event.load \
-          /etc/apache2/mods-enabled/mpm_event.conf \
-          /etc/apache2/mods-enabled/mpm_worker.load \
-          /etc/apache2/mods-enabled/mpm_worker.conf && \
-    ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load && \
-    ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf && \
-    sed -i \"s/Listen 80/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && \
-    sed -i \"s/:80/:${PORT:-80}/\" /etc/apache2/sites-available/000-default.conf && \
-    apache2-foreground \
-"]
+# Environment variables
+ENV PYTHONPATH=/var/www/html/ai_engine
+
+ENTRYPOINT ["./entrypoint.sh"]
