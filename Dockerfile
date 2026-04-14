@@ -14,6 +14,9 @@ RUN docker-php-ext-install pdo_mysql mysqli
 # Enable Apache modules for proxying
 RUN a2enmod proxy proxy_http
 
+# Ensure only mpm_prefork is loaded (fix for 'More than one MPM loaded' error)
+RUN a2dismod mpm_event mpm_worker || true && a2enmod mpm_prefork
+
 # Set the working directory
 WORKDIR /var/www/html
 
