@@ -1,52 +1,30 @@
-# Use PHP 8.2 with Apache as the base image
 FROM php:8.2-apache
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-venv \
-    && rm -rf /var/lib/apt/lists/*
+RUN rm -f /etc/apache2/mods-enabled/mpm_*.load \
+         /etc/apache2/mods-enabled/mpm_*.conf \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load \
+    && ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mysqli
+RUN a2enmod rewrite headers
 
-# Enable Apache modules for proxying
-RUN a2enmod proxy proxy_http
+RUN sed -i 's/Listen 80/Listen ${PORT:-80}/' /etc/apache2/ports.conf \
+    && sed -i 's/:80/:${PORT:-80}/' /etc/apache2/sites-available/000-default.conf
 
-# Ensure only mpm_prefork is loaded (Nuclear fix for 'More than one MPM loaded')
-RUN rm -f /etc/apache2/mods-enabled/mpm_event.load /etc/apache2/mods-enabled/mpm_event.conf \
-    && rm -f /etc/apache2/mods-enabled/mpm_worker.load /etc/apache2/mods-enabled/mpm_worker.conf \
-    && a2enmod mpm_prefork || true
+RUN sed -i '/<Directory \/var\/www\/html>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# Set the working directory
-WORKDIR /var/www/html
+COPY . /var/www/html/
 
-# Copy the frontend files
-COPY public/ .
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
-# Prepare AI Engine directory
-RUN mkdir -p /app/ai_engine
-WORKDIR /app/ai_engine
-
-# Copy the backend files
-COPY ai_engine/ .
-
-# Install Python dependencies
-RUN pip3 install --no-cache-dir -r requirements.txt --break-system-packages
-
-# Copy Apache configuration
-COPY 000-default.conf /etc/apache2/sites-available/000-default.conf
-
-# Create an entrypoint script to start both services
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# Expose the port Railway provides via $PORT
 EXPOSE 80
 
-# Environment variables
-ENV PORT=80
-ENV PYTHONPATH=/app/ai_engine
-
-ENTRYPOINT ["entrypoint.sh"]
+CMD ["sh", "-c", " \
+    rm -f /etc/apache2/mods-enabled/mpm_event.load \
+          /etc/apache2/mods-enabled/mpm_event.conf \
+          /etc/apache2/mods-enabled/mpm_worker.load \
+          /etc/apache2/mods-enabled/mpm_worker.conf && \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.load /etc/apache2/mods-enabled/mpm_prefork.load && \
+    ln -sf /etc/apache2/mods-available/mpm_prefork.conf /etc/apache2/mods-enabled/mpm_prefork.conf && \
+    apache2-foreground \
+"]
