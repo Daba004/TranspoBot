@@ -69,11 +69,19 @@ INCIDENT_TYPES = [
 # DATABASE
 # ============================================================
 def get_db_connection():
+    # Railway standard variables
+    host = os.getenv("MYSQLHOST") or os.getenv("DB_HOST", "localhost")
+    user = os.getenv("MYSQLUSER") or os.getenv("DB_USER", "root")
+    password = os.getenv("MYSQLPASSWORD") or os.getenv("DB_PASS", "")
+    database = os.getenv("MYSQLDATABASE") or os.getenv("DB_NAME", "transpobot")
+    port = os.getenv("MYSQLPORT", "3306")
+
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASS", ""),
-        database=os.getenv("DB_NAME", "transpobot")
+        host=host,
+        user=user,
+        password=password,
+        database=database,
+        port=int(port)
     )
 
 
@@ -779,4 +787,7 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    port = int(os.getenv("PORT", 8000))
+    # We use 8000 as default because in our Docker setup, 
+    # Apache will proxy to 8000, and Railway's $PORT will be used by Apache.
+    uvicorn.run(app, host="0.0.0.0", port=port)

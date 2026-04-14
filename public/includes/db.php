@@ -1,9 +1,11 @@
 <?php
 // Configuration de la base de données
-$host = 'localhost';
-$dbname = 'transpobot';
-$username = 'root';
-$password = '';
+// Configuration de la base de données
+$host = getenv('MYSQLHOST') ?: 'localhost';
+$dbname = getenv('MYSQLDATABASE') ?: 'transpobot';
+$username = getenv('MYSQLUSER') ?: 'root';
+$password = getenv('MYSQLPASSWORD') ?: '';
+$port = getenv('MYSQLPORT') ?: '3306';
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);

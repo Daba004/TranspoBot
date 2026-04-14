@@ -11,7 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusLabels = document.querySelectorAll('.ai-status-label');
 
     // API URL de FastAPI
-    const API_URL = 'http://localhost:8000';
+    // API URL de FastAPI (vide en production car proxifié par Apache)
+    const API_URL = window.location.origin;
     const ASK_URL = `${API_URL}/ask`;
 
     function addMessage(text, isUser = false, data = null) {
