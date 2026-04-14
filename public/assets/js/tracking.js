@@ -12,7 +12,7 @@
     // =========================================================
     const map = L.map('map', {
         zoomControl: false
-    }).setView([14.7167, -17.4677], 11);
+    }).setView([14.7167, -17.4677], 12);
 
     // Zoom control in bottom-left
     L.control.zoom({ position: 'bottomleft' }).addTo(map);
@@ -265,7 +265,7 @@
     window.focusVehicle = function(vehicleId) {
         const marker = markers[vehicleId];
         if (marker) {
-            map.flyTo(marker.getLatLng(), 14, { duration: 1.2 });
+            map.flyTo(marker.getLatLng(), 13, { duration: 1.2 });
             marker.openPopup();
         }
     };
@@ -434,7 +434,7 @@
             
             if (positions.length > 0) {
                 const bounds = L.latLngBounds(positions);
-                map.fitBounds(bounds.pad(0.3));
+                map.fitBounds(bounds.pad(0.3), { maxZoom: 13 });
             }
         } catch (error) {
             console.error('[Init]', error);

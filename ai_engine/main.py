@@ -19,6 +19,8 @@ load_dotenv()
 # ============================================================
 simulation_active = False
 simulation_stats = {"ticks": 0, "incidents_generated": 0, "trips_completed": 0}
+virtual_trips = {}  # vehicle_id -> {progress, start_time, ligne_info}
+
 
 # Dakar region route waypoints for realistic movement
 ROUTE_WAYPOINTS = {
@@ -107,8 +109,15 @@ async def run_simulation():
                 ligne_code = trip['ligne_code']
                 waypoints = ROUTE_WAYPOINTS.get(ligne_code)
                 
-                if not waypoints or not trip['origine_lat']:
-                    continue
+                if not waypoints:
+                    # Fallback to straight line between origin and destination
+                    if trip['origine_lat'] and trip['destination_lat']:
+                        waypoints = [
+                            (float(trip['origine_lat']), float(trip['origine_lng'])),
+                            (float(trip['destination_lat']), float(trip['destination_lng']))
+                        ]
+                    else:
+                        continue
                 
                 # --- Handle planned trips: start them if departure time has passed ---
                 if trip['trajet_statut'] == 'planifie':
@@ -171,15 +180,65 @@ async def run_simulation():
                         _generate_random_incident(cursor, trip['trajet_id'])
                         simulation_stats["incidents_generated"] += 1
             
-            conn.commit()
-            cursor.close()
-            conn.close()
             simulation_stats["ticks"] += 1
+            
+            # --- Handle Virtual Simulation for idle vehicles ---
+            await _update_virtual_trips(cursor)
+            
+            conn.commit()
             
         except Exception as e:
             print(f"[SIM ERROR] {e}")
         
         await asyncio.sleep(5)
+
+
+async def _update_virtual_trips(cursor):
+    """Manage in-memory 'virtual' trips for vehicles that are active but have no trip in DB."""
+    global virtual_trips, simulation_active
+    if not simulation_active: return
+
+    # Get all active vehicles
+    cursor.execute("SELECT v.id, v.latitude, v.longitude, v.statut FROM vehicules v WHERE v.statut = 'actif'")
+    active_vehicles = {v['id']: v for v in cursor.fetchall()}
+
+    # Get vehicles already on real trips
+    cursor.execute("SELECT vehicule_id FROM trajets WHERE statut IN ('en_cours', 'planifie')")
+    busy_vehicle_ids = {t['vehicule_id'] for t in cursor.fetchall()}
+
+    # Get all lines for random assignment
+    cursor.execute("SELECT id, code, nom, origine_lat, origine_lng, destination_lat, destination_lng FROM lignes")
+    all_lines = cursor.fetchall()
+
+    for vid, v in active_vehicles.items():
+        if vid in busy_vehicle_ids:
+            if vid in virtual_trips: del virtual_trips[vid]
+            continue
+
+        if vid not in virtual_trips:
+            # Start a new virtual trip
+            line = random.choice(all_lines)
+            virtual_trips[vid] = {
+                "progress": 0.0,
+                "line": line,
+                "waypoints": ROUTE_WAYPOINTS.get(line['code'], [(float(line['origine_lat']), float(line['origine_lng'])), (float(line['destination_lat']), float(line['destination_lng']))]),
+                "speed": random.uniform(30, 60),
+                "fuel": 100
+            }
+        
+        # Update progress
+        vt = virtual_trips[vid]
+        vt['progress'] += random.uniform(0.01, 0.04) # Slower than real trips for variety
+        if vt['progress'] >= 1.0:
+            # Swap destination and origin to simulate return trip
+            vt['progress'] = 0.0
+            line = vt['line']
+            vt['waypoints'] = list(reversed(vt['waypoints']))
+        
+        # Calculate new position
+        new_lat, new_lng = _interpolate_waypoints(vt['waypoints'], vt['progress'])
+        vt['current_pos'] = (new_lat, new_lng)
+        vt['fuel'] = max(10, vt['fuel'] - random.uniform(0.1, 0.3))
 
 
 def _calculate_progress(lat, lng, waypoints):
@@ -491,6 +550,18 @@ async def get_vehicle_positions():
         """)
         vehicles = cursor.fetchall()
         
+        # Merge virtual positions
+        for v in vehicles:
+            if v['id'] in virtual_trips:
+                vt = virtual_trips[v['id']]
+                v['latitude'] = vt['current_pos'][0]
+                v['longitude'] = vt['current_pos'][1]
+                v['vitesse'] = vt['speed']
+                v['carburant'] = int(vt['fuel'])
+                v['trajet_statut'] = 'en_cours'
+                v['ligne_code'] = vt['line']['code']
+                v['ligne_nom'] = vt['line']['nom']
+        
         # Convert Decimal types to float for JSON serialization
         for v in vehicles:
             for key in ['latitude', 'longitude', 'vitesse']:
@@ -615,6 +686,18 @@ async def stream_positions():
                     LEFT JOIN lignes l ON t.ligne_id = l.id
                 """)
                 vehicles = cursor.fetchall()
+                
+                # Merge virtual positions
+                for v in vehicles:
+                    if v['id'] in virtual_trips:
+                        vt = virtual_trips[v['id']]
+                        v['latitude'] = vt['current_pos'][0]
+                        v['longitude'] = vt['current_pos'][1]
+                        v['vitesse'] = vt['speed']
+                        v['carburant'] = int(vt['fuel'])
+                        v['trajet_statut'] = 'en_cours'
+                        v['ligne_code'] = vt['line']['code']
+                        v['ligne_nom'] = vt['line']['nom']
                 
                 for v in vehicles:
                     for key in ['latitude', 'longitude', 'vitesse']:
