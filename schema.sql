@@ -2,7 +2,8 @@
 --  TranspoBot — Base de données MySQL
 --  Projet GLSi L3 — ESP/UCAD
 -- ============================================================
-
+CREATE DATABASE IF NOT EXISTS railway;
+USE railway;
 CREATE DATABASE IF NOT EXISTS transpobot CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE transpobot;
 
