@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+mysql-connector-python
+python-dotenv
+requests
+pydantic-settings
+openai
+# Si vous utilisez Groq
+groq

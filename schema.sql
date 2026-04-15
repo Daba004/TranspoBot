@@ -1,12 +1,18 @@
 -- ============================================================
 --  TranspoBot — Base de données MySQL
 --  Projet GLSi L3 — ESP/UCAD
+--  Ce script crée la base de données et ses tables, 
+--  et y insère des données de test.
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS transpobot CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE transpobot;
 
--- Véhicules
+-- ==========================================
+-- Table: vehicules
+-- Gère la flotte de bus, minibus et taxis.
+-- Stocke les informations techniques et de géolocalisation.
+-- ==========================================
 CREATE TABLE vehicules (
     id INT AUTO_INCREMENT PRIMARY KEY,
     immatriculation VARCHAR(20) NOT NULL UNIQUE,
@@ -15,10 +21,17 @@ CREATE TABLE vehicules (
     statut ENUM('actif','maintenance','hors_service') DEFAULT 'actif',
     kilometrage INT DEFAULT 0,
     date_acquisition DATE,
+    latitude DECIMAL(10,7) DEFAULT NULL,
+    longitude DECIMAL(10,7) DEFAULT NULL,
+    carburant INT DEFAULT 100,
+    vitesse DECIMAL(5,2) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Chauffeurs
+-- ==========================================
+-- Table: chauffeurs
+-- Gère les conducteurs associés ou non à un véhicule.
+-- ==========================================
 CREATE TABLE chauffeurs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom VARCHAR(100) NOT NULL,
@@ -33,7 +46,11 @@ CREATE TABLE chauffeurs (
     FOREIGN KEY (vehicule_id) REFERENCES vehicules(id)
 );
 
--- Lignes / trajets types
+-- ==========================================
+-- Table: lignes
+-- Définit les différents itinéraires ou lignes régulières.
+-- Les coordonnées (GPS) d'origine et de destination y figurent.
+-- ==========================================
 CREATE TABLE lignes (
     id INT AUTO_INCREMENT PRIMARY KEY,
     code VARCHAR(10) NOT NULL UNIQUE,
@@ -41,10 +58,18 @@ CREATE TABLE lignes (
     origine VARCHAR(100) NOT NULL,
     destination VARCHAR(100) NOT NULL,
     distance_km DECIMAL(6,2),
-    duree_minutes INT
+    duree_minutes INT,
+    origine_lat DECIMAL(10,7) DEFAULT NULL,
+    origine_lng DECIMAL(10,7) DEFAULT NULL,
+    destination_lat DECIMAL(10,7) DEFAULT NULL,
+    destination_lng DECIMAL(10,7) DEFAULT NULL
 );
 
--- Tarifs
+
+-- ==========================================
+-- Table: tarifs
+-- Grille tarifaire applicable à chaque ligne, selon le type de client.
+-- ==========================================
 CREATE TABLE tarifs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ligne_id INT NOT NULL,
@@ -53,7 +78,11 @@ CREATE TABLE tarifs (
     FOREIGN KEY (ligne_id) REFERENCES lignes(id)
 );
 
--- Trajets effectués
+-- ==========================================
+-- Table: trajets
+-- Historise les courses/déplacements effectués ou planifiés.
+-- Permet de suivre les revenus (recette) et l'affluence (nb_passagers).
+-- ==========================================
 CREATE TABLE trajets (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ligne_id INT NOT NULL,
@@ -70,7 +99,11 @@ CREATE TABLE trajets (
     FOREIGN KEY (vehicule_id) REFERENCES vehicules(id)
 );
 
--- Incidents
+-- ==========================================
+-- Table: incidents
+-- Répertorie les différents aléas (pannes, accidents, etc.) 
+-- survenus lors d'un trajet spécifique.
+-- ==========================================
 CREATE TABLE incidents (
     id INT AUTO_INCREMENT PRIMARY KEY,
     trajet_id INT NOT NULL,
@@ -100,11 +133,11 @@ INSERT INTO chauffeurs (nom, prenom, telephone, numero_permis, categorie_permis,
 ('SECK', 'Ousmane', '+221774567890', 'P-2022-004', 'D', 5, '2022-10-20'),
 ('BA', 'Aminata', '+221775678901', 'P-2023-005', 'D', NULL, '2023-01-10');
 
-INSERT INTO lignes (code, nom, origine, destination, distance_km, duree_minutes) VALUES
-('L1', 'Ligne Dakar-Thiès', 'Dakar', 'Thiès', 70.5, 90),
-('L2', 'Ligne Dakar-Mbour', 'Dakar', 'Mbour', 82.0, 120),
-('L3', 'Ligne Centre-Banlieue', 'Plateau', 'Pikine', 15.0, 45),
-('L4', 'Ligne Aéroport', 'Centre-ville', 'AIBD', 45.0, 60);
+INSERT INTO lignes (code, nom, origine, destination, distance_km, duree_minutes, origine_lat, origine_lng, destination_lat, destination_lng) VALUES
+('L1', 'Ligne Dakar-Thiès', 'Dakar', 'Thiès', 70.5, 90, 14.6937, -17.4441, 14.7886, -16.9260),
+('L2', 'Ligne Dakar-Mbour', 'Dakar', 'Mbour', 82.0, 120, 14.6937, -17.4441, 14.4177, -16.9599),
+('L3', 'Ligne Centre-Banlieue', 'Plateau', 'Pikine', 15.0, 45, 14.6693, -17.4380, 14.7645, -17.3864),
+('L4', 'Ligne Aéroport', 'Centre-ville', 'AIBD', 45.0, 60, 14.6693, -17.4380, 14.7397, -17.4902);
 
 INSERT INTO tarifs (ligne_id, type_client, prix) VALUES
 (1, 'normal', 2500), (1, 'etudiant', 1500), (1, 'senior', 1800),
